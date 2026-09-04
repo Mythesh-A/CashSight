@@ -1,0 +1,187 @@
+﻿├── backend
+│   ├── audit
+│   │   ├── __init__.py
+│   │   ├── logger.py
+│   │   └── trail.py
+│   ├── forecasting
+│   │   ├── __init__.py
+│   │   └── forecast_pipeline.py
+│   ├── human_loop
+│   │   ├── __init__.py
+│   │   ├── exception_resolver.py
+│   │   └── verified_matches.py
+│   ├── import_schema
+│   │   ├── __init__.py
+│   │   ├── column_mapper.py
+│   │   ├── csv_analyzer.py
+│   │   └── schema_matcher.py
+│   ├── reconciliation
+│   │   ├── __init__.py
+│   │   ├── ambiguity_resolver.py
+│   │   ├── bank_matcher.py
+│   │   ├── orphan_checker.py
+│   │   ├── pipeline.py
+│   │   └── subset_sum_matcher.py
+│   ├── reports
+│   │   ├── __init__.py
+│   │   ├── forecast_report.py
+│   │   ├── full_report.py
+│   │   ├── generator.py
+│   │   ├── reconciliation_report.py
+│   │   ├── routes.py
+│   │   └── tax_fee_report.py
+│   ├── tax_analyzer
+│   │   ├── __init__.py
+│   │   ├── analyzer.py
+│   │   └── routes.py
+│   ├── validation
+│   │   ├── __init__.py
+│   │   ├── data_validator.py
+│   │   └── quality_report.py
+│   ├── __init__.py
+│   ├── app.py
+│   ├── config.py
+│   ├── explain.py
+│   ├── models.py
+│   ├── routes.py
+│   └── score.py
+├── data
+│   ├── generated
+│   │   ├── bank_statement.csv
+│   │   ├── ledger.csv
+│   │   └── settlements.csv
+│   └── ground_truth
+│       └── answer_key.json
+├── data_gen
+│   ├── __init__.py
+│   ├── build_answer_key.py
+│   ├── config.py
+│   ├── generate_bank_statement.py
+│   ├── generate_ledger.py
+│   ├── generate_settlements.py
+│   ├── inject_anomalies.py
+│   └── run_all.py
+├── docs
+│   ├── anomaly_taxonomy.md
+│   └── architecture.md
+├── frontend
+│   ├── src
+│   │   ├── api
+│   │   │   ├── endpoints.js
+│   │   │   ├── index.js
+│   │   │   └── services.js
+│   │   ├── components
+│   │   │   ├── audit
+│   │   │   │   ├── AuditDetails.jsx
+│   │   │   │   ├── AuditPage.jsx
+│   │   │   │   ├── AuditTrail.jsx
+│   │   │   │   ├── constants.js
+│   │   │   │   ├── index.js
+│   │   │   │   └── styles.js
+│   │   │   ├── common
+│   │   │   │   ├── Button.jsx
+│   │   │   │   ├── Card.jsx
+│   │   │   │   ├── constants.js
+│   │   │   │   ├── ErrorBoundary.jsx
+│   │   │   │   ├── Footer.jsx
+│   │   │   │   ├── Header.jsx
+│   │   │   │   ├── index.js
+│   │   │   │   ├── LoadingSpinner.jsx
+│   │   │   │   ├── StatusBadge.jsx
+│   │   │   │   └── typography.js
+│   │   │   ├── dashboard
+│   │   │   │   ├── CashPositionCard.jsx
+│   │   │   │   ├── constants.js
+│   │   │   │   ├── Dashboard.jsx
+│   │   │   │   ├── ExceptionSummaryCard.jsx
+│   │   │   │   ├── index.js
+│   │   │   │   ├── MatchSummaryCard.jsx
+│   │   │   │   ├── MetricsPanel.jsx
+│   │   │   │   └── styles.js
+│   │   │   ├── exceptions
+│   │   │   │   ├── constants.js
+│   │   │   │   ├── ExceptionDetails.jsx
+│   │   │   │   ├── ExceptionFilters.jsx
+│   │   │   │   ├── ExceptionInbox.jsx
+│   │   │   │   ├── ExceptionResolver.jsx
+│   │   │   │   ├── ExceptionTable.jsx
+│   │   │   │   ├── index.js
+│   │   │   │   ├── ResolutionGuide.jsx
+│   │   │   │   └── styles.js
+│   │   │   ├── forecast
+│   │   │   │   ├── CashFlowProjection.jsx
+│   │   │   │   ├── constants.js
+│   │   │   │   ├── ForecastChart.jsx
+│   │   │   │   ├── ForecastSummary.jsx
+│   │   │   │   ├── index.js
+│   │   │   │   └── styles.js
+│   │   │   ├── layout
+│   │   │   │   ├── index.js
+│   │   │   │   └── Sidebar.jsx
+│   │   │   ├── matches
+│   │   │   │   ├── index.js
+│   │   │   │   ├── MatchDetails.jsx
+│   │   │   │   ├── MatchInbox.jsx
+│   │   │   │   └── MatchTable.jsx
+│   │   │   ├── reports
+│   │   │   │   ├── index.js
+│   │   │   │   ├── ReportCard.jsx
+│   │   │   │   └── ReportsPage.jsx
+│   │   │   ├── tax
+│   │   │   │   ├── index.js
+│   │   │   │   ├── TaxAnalyzer.jsx
+│   │   │   │   ├── TaxDetails.jsx
+│   │   │   │   ├── TaxMonthly.jsx
+│   │   │   │   ├── TaxSummary.jsx
+│   │   │   │   └── TaxTable.jsx
+│   │   │   └── upload
+│   │   │       ├── ColumnMapper.jsx
+│   │   │       ├── constants.js
+│   │   │       ├── CSVUploader.jsx
+│   │   │       ├── DataQualityReport.jsx
+│   │   │       ├── FileDropZone.jsx
+│   │   │       ├── index.js
+│   │   │       └── styles.js
+│   │   ├── context
+│   │   │   ├── AppContext.jsx
+│   │   │   ├── constants.js
+│   │   │   ├── DataContext.jsx
+│   │   │   ├── index.js
+│   │   │   └── ThemeContext.jsx
+│   │   ├── hooks
+│   │   │   ├── constants.js
+│   │   │   ├── index.js
+│   │   │   ├── useCashPosition.js
+│   │   │   ├── useDebounce.js
+│   │   │   ├── useExceptions.js
+│   │   │   ├── useFileUpload.js
+│   │   │   ├── useForecast.js
+│   │   │   ├── useInterval.js
+│   │   │   ├── useLocalStorage.js
+│   │   │   ├── useNotification.js
+│   │   │   ├── usePrevious.js
+│   │   │   ├── useReconciliation.js
+│   │   │   └── useWindowSize.js
+│   │   ├── styles
+│   │   │   ├── components.css
+│   │   │   ├── index.css
+│   │   │   └── variables.css
+│   │   ├── types
+│   │   │   └── index.js
+│   │   ├── utils
+│   │   │   ├── constants.js
+│   │   │   ├── formatters.js
+│   │   │   ├── helpers.js
+│   │   │   ├── index.js
+│   │   │   └── validators.js
+│   │   ├── App.jsx
+│   │   ├── main.jsx
+│   │   └── routes.jsx
+│   ├── .eslintrc.cjs
+│   ├── index.html
+│   ├── package.json
+│   ├── package-lock.json
+│   └── vite.config.js
+├── .gitignore
+├── README.md
+└── requirements.txt
