@@ -656,90 +656,310 @@ The API layer handles request validation and error responses while business logi
 
 ---
 
-# 19. Backend Module Architecture
+# 19. Backend Architecture & Module Structure
+
+The CashSight backend is implemented using Python and Flask. The backend is organized into domain-specific modules so that CSV ingestion, validation, reconciliation, forecasting, tax analysis, reporting, and human review remain separated and maintainable.
 
 ```text
 backend/
+├── audit/
+│   ├── __init__.py
+│   ├── logger.py
+│   └── trail.py
 │
-├── routes.py
+├── forecasting/
+│   ├── __init__.py
+│   └── forecast_pipeline.py
+│
+├── human_loop/
+│   ├── __init__.py
+│   ├── exception_resolver.py
+│   └── verified_matches.py
+│
+├── import_schema/
+│   ├── __init__.py
+│   ├── column_mapper.py
+│   ├── csv_analyzer.py
+│   └── schema_matcher.py
 │
 ├── reconciliation/
-│   ├── pipeline.py
-│   ├── bank_matcher.py
-│   ├── subset_sum_matcher.py
+│   ├── __init__.py
 │   ├── ambiguity_resolver.py
+│   ├── bank_matcher.py
 │   ├── orphan_checker.py
-│   └── scoring.py
+│   ├── pipeline.py
+│   └── subset_sum_matcher.py
+│
+├── reports/
+│   ├── __init__.py
+│   ├── forecast_report.py
+│   ├── full_report.py
+│   ├── generator.py
+│   ├── reconciliation_report.py
+│   ├── routes.py
+│   └── tax_fee_report.py
 │
 ├── tax_analyzer/
+│   ├── __init__.py
 │   ├── analyzer.py
 │   └── routes.py
 │
-├── reports/
-│   ├── generator.py
-│   ├── reconciliation_report.py
-│   ├── forecast_report.py
-│   ├── tax_fee_report.py
-│   └── full_report.py
+├── validation/
+│   ├── __init__.py
+│   ├── data_validator.py
+│   └── quality_report.py
 │
-└── audit/
+├── __init__.py
+├── app.py
+├── config.py
+├── explain.py
+├── models.py
+├── routes.py
+└── score.py
 ```
 
-The main design principle is separation of concerns.
+## Backend Module Responsibilities
 
-For example:
+| Module                  | Responsibility                                                                                                             |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `import_schema/`        | Analyzes uploaded CSV files, detects schemas, suggests column mappings, and normalizes input structure.                    |
+| `validation/`           | Validates required fields, data types, dates, numeric values, duplicates, and financial consistency before reconciliation. |
+| `reconciliation/`       | Implements the core three-way reconciliation between ledger, settlements, and bank transactions.                           |
+| `subset_sum_matcher.py` | Searches for combinations of ledger orders that explain a settlement's gross amount.                                       |
+| `bank_matcher.py`       | Matches settlements with bank credits using UTR, amount tolerance, and date-window rules.                                  |
+| `ambiguity_resolver.py` | Detects cases where multiple valid ledger combinations exist instead of forcing an incorrect match.                        |
+| `orphan_checker.py`     | Identifies bank credits that cannot be linked to a settlement.                                                             |
+| `human_loop/`           | Handles manual investigation and confirmation/rejection of unresolved or ambiguous exceptions.                             |
+| `forecasting/`          | Generates the current 7-day cash-position scenario forecast from reconciled and pending amounts.                           |
+| `tax_analyzer/`         | Analyzes gateway fees, GST, TDS, deductions, and settlement-level financial consistency.                                   |
+| `reports/`              | Generates reconciliation, forecasting, tax & fee, and full PDF reports.                                                    |
+| `audit/`                | Records important system actions and maintains an auditable activity trail.                                                |
+| `explain.py`            | Provides explanations for reconciliation results and exceptions.                                                           |
+| `score.py`              | Calculates evaluation metrics such as precision, recall, F1, match rate, and monetary error metrics.                       |
+| `models.py`             | Contains shared backend data structures and application models.                                                            |
+| `routes.py`             | Defines the main Flask API routes used by the frontend.                                                                    |
+| `app.py`                | Initializes and configures the Flask application.                                                                          |
+| `config.py`             | Stores application-level configuration.                                                                                    |
+
+The backend follows a pipeline-oriented architecture:
 
 ```text
-routes.py
+CSV Upload
     ↓
-pipeline.py
+Schema Detection & Column Mapping
     ↓
-bank_matcher.py
-subset_sum_matcher.py
-ambiguity_resolver.py
-orphan_checker.py
+Data Validation
+    ↓
+Reconciliation Pipeline
+    ├── Settlement ↔ Bank Matching
+    ├── Settlement ↔ Ledger Matching
+    ├── Ambiguity Resolution
+    └── Orphan Detection
+    ↓
+Exception Classification
+    ↓
+Human Review When Required
+    ↓
+Cash Position
+    ↓
+Forecasting / Tax Analysis / Reporting / Audit
 ```
 
-The Flask route does not contain the complete reconciliation algorithm.
+This separation allows each financial operation to be independently tested and extended without tightly coupling the entire reconciliation workflow.
 
 ---
 
-# 20. Frontend Architecture
+# 20. Frontend Architecture & Component Structure
 
-The React application is organized around independent functional modules.
-
-```text
-Frontend
-│
-├── Upload Flow
-│   ├── CSVUploader
-│   ├── ColumnMapper
-│   └── DataQualityReport
-│
-├── Dashboard
-│
-├── Exception Center
-│   ├── ExceptionInbox
-│   └── ExceptionDetails
-│
-├── Tax & Fee Analyzer
-│
-├── Reports
-│   ├── ReportsPage
-│   └── ReportCard
-│
-├── Audit Log
-│
-└── Shared Components
-```
-
-Application-level state is managed through React contexts such as:
+The CashSight frontend is built using React with Vite. The frontend is organized into feature-based components, reusable hooks, shared state, API services, and utility modules.
 
 ```text
-AppContext
-DataContext
-ThemeContext
+frontend/
+├── src/
+│   ├── api/
+│   │   ├── endpoints.js
+│   │   ├── index.js
+│   │   └── services.js
+│   │
+│   ├── components/
+│   │   ├── audit/
+│   │   │   ├── AuditDetails.jsx
+│   │   │   ├── AuditPage.jsx
+│   │   │   ├── AuditTrail.jsx
+│   │   │   ├── constants.js
+│   │   │   ├── index.js
+│   │   │   └── styles.js
+│   │   │
+│   │   ├── common/
+│   │   │   ├── Button.jsx
+│   │   │   ├── Card.jsx
+│   │   │   ├── constants.js
+│   │   │   ├── ErrorBoundary.jsx
+│   │   │   ├── Footer.jsx
+│   │   │   ├── Header.jsx
+│   │   │   ├── index.js
+│   │   │   ├── LoadingSpinner.jsx
+│   │   │   ├── StatusBadge.jsx
+│   │   │   └── typography.js
+│   │   │
+│   │   ├── dashboard/
+│   │   │   ├── CashPositionCard.jsx
+│   │   │   ├── constants.js
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── ExceptionSummaryCard.jsx
+│   │   │   ├── index.js
+│   │   │   ├── MatchSummaryCard.jsx
+│   │   │   ├── MetricsPanel.jsx
+│   │   │   └── styles.js
+│   │   │
+│   │   ├── exceptions/
+│   │   │   ├── constants.js
+│   │   │   ├── ExceptionDetails.jsx
+│   │   │   ├── ExceptionFilters.jsx
+│   │   │   ├── ExceptionInbox.jsx
+│   │   │   ├── ExceptionResolver.jsx
+│   │   │   ├── ExceptionTable.jsx
+│   │   │   ├── index.js
+│   │   │   ├── ResolutionGuide.jsx
+│   │   │   └── styles.js
+│   │   │
+│   │   ├── forecast/
+│   │   │   ├── CashFlowProjection.jsx
+│   │   │   ├── constants.js
+│   │   │   ├── ForecastChart.jsx
+│   │   │   ├── ForecastSummary.jsx
+│   │   │   ├── index.js
+│   │   │   └── styles.js
+│   │   │
+│   │   ├── layout/
+│   │   │   ├── index.js
+│   │   │   └── Sidebar.jsx
+│   │   │
+│   │   ├── matches/
+│   │   │   ├── index.js
+│   │   │   ├── MatchDetails.jsx
+│   │   │   ├── MatchInbox.jsx
+│   │   │   └── MatchTable.jsx
+│   │   │
+│   │   ├── reports/
+│   │   │   ├── index.js
+│   │   │   ├── ReportCard.jsx
+│   │   │   └── ReportsPage.jsx
+│   │   │
+│   │   ├── tax/
+│   │   │   ├── index.js
+│   │   │   ├── TaxAnalyzer.jsx
+│   │   │   ├── TaxDetails.jsx
+│   │   │   ├── TaxMonthly.jsx
+│   │   │   ├── TaxSummary.jsx
+│   │   │   └── TaxTable.jsx
+│   │   │
+│   │   └── upload/
+│   │       ├── ColumnMapper.jsx
+│   │       ├── constants.js
+│   │       ├── CSVUploader.jsx
+│   │       ├── DataQualityReport.jsx
+│   │       ├── FileDropZone.jsx
+│   │       ├── index.js
+│   │       └── styles.js
+│   │
+│   ├── context/
+│   │   ├── AppContext.jsx
+│   │   ├── constants.js
+│   │   ├── DataContext.jsx
+│   │   ├── index.js
+│   │   └── ThemeContext.jsx
+│   │
+│   ├── hooks/
+│   │   ├── constants.js
+│   │   ├── index.js
+│   │   ├── useCashPosition.js
+│   │   ├── useDebounce.js
+│   │   ├── useExceptions.js
+│   │   ├── useFileUpload.js
+│   │   ├── useForecast.js
+│   │   ├── useInterval.js
+│   │   ├── useLocalStorage.js
+│   │   ├── useNotification.js
+│   │   ├── usePrevious.js
+│   │   ├── useReconciliation.js
+│   │   └── useWindowSize.js
+│   │
+│   ├── styles/
+│   │   ├── components.css
+│   │   ├── index.css
+│   │   └── variables.css
+│   │
+│   ├── types/
+│   │   └── index.js
+│   │
+│   ├── utils/
+│   │   ├── constants.js
+│   │   ├── formatters.js
+│   │   ├── helpers.js
+│   │   ├── index.js
+│   │   └── validators.js
+│   │
+│   ├── App.jsx
+│   ├── main.jsx
+│   └── routes.jsx
+│
+├── .eslintrc.cjs
+├── index.html
+├── package.json
+├── package-lock.json
+└── vite.config.js
 ```
+
+## Frontend Module Responsibilities
+
+| Module                   | Responsibility                                                                                                                              |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `api/`                   | Centralizes backend endpoints and API service calls.                                                                                        |
+| `components/upload/`     | Handles CSV upload, drag-and-drop, column mapping, file processing, and data-quality presentation.                                          |
+| `components/dashboard/`  | Displays cash position, reconciliation metrics, matched amounts, and exception summaries.                                                   |
+| `components/exceptions/` | Provides exception inbox, filtering, investigation, candidate matches, and resolution workflows.                                            |
+| `components/matches/`    | Displays reconciled matches and their supporting details.                                                                                   |
+| `components/forecast/`   | Presents the 7-day cash-position forecast and forecast summaries.                                                                           |
+| `components/tax/`        | Displays tax, fee, GST, TDS, deduction, and monthly analysis.                                                                               |
+| `components/reports/`    | Provides report selection and report download functionality.                                                                                |
+| `components/audit/`      | Displays audit history, actions, and detailed audit information.                                                                            |
+| `components/common/`     | Contains reusable UI components, loading states, status indicators, and error handling.                                                     |
+| `components/layout/`     | Provides application navigation and sidebar layout.                                                                                         |
+| `context/`               | Manages shared application, data, and theme state.                                                                                          |
+| `hooks/`                 | Contains reusable frontend logic for uploads, reconciliation, exceptions, forecasting, cash position, notifications, and other UI behavior. |
+| `utils/`                 | Provides formatting, validation, constants, and general helper functions.                                                                   |
+| `styles/`                | Contains global and component-level styling.                                                                                                |
+| `types/`                 | Defines shared frontend data structures.                                                                                                    |
+| `routes.jsx`             | Defines frontend application routes.                                                                                                        |
+| `App.jsx`                | Root React application component.                                                                                                           |
+| `main.jsx`               | Frontend entry point.                                                                                                                       |
+
+### Frontend-to-Backend Interaction
+
+The frontend communicates with the Flask backend through the centralized API layer:
+
+```text
+React UI
+   ↓
+Feature Components
+   ↓
+Custom Hooks / Context
+   ↓
+API Services
+   ↓
+Flask REST API
+   ↓
+Backend Processing Modules
+   ↓
+JSON Response
+   ↓
+React State Update
+   ↓
+UI / Dashboard / Reports
+```
+
+This architecture keeps presentation logic separate from financial processing logic. The frontend is responsible for interaction, visualization, workflow management, and user feedback, while the backend remains responsible for validation, reconciliation, financial analysis, forecasting logic, exception processing, audit logging, and report generation.
 
 ---
 
@@ -1033,7 +1253,177 @@ Scheduled ingestion
 
 ---
 
-# 28. Future Architecture
+# 28. Future Enhancements
+
+CashSight is currently focused on deterministic, explainable reconciliation using structured CSV data. The following enhancements would extend the system toward a production-grade payment and finance-operations platform.
+
+### 28.1 Payment Gateway & API Integrations
+
+The current CSV-based ingestion can be extended to direct integrations with payment gateways such as Razorpay and other payment providers, as well as banks and accounting systems.
+
+Future capabilities could include:
+
+* Automatic settlement and transaction ingestion through APIs and webhooks
+* Scheduled or near real-time reconciliation
+* Support for multiple payment gateways and bank accounts
+* Automatic detection of newly generated settlements and bank credits
+* Unified reconciliation across multiple payment sources
+
+This would reduce dependency on manual file uploads and allow finance teams to continuously monitor their payment flows.
+
+### 28.2 AI-Assisted Exception Investigation
+
+An AI layer can be introduced on top of the existing deterministic reconciliation engine.
+
+The AI system could:
+
+* Explain why a transaction failed to reconcile
+* Summarize supporting transaction evidence
+* Suggest likely candidate matches
+* Recommend possible resolutions
+* Generate investigation summaries for finance teams
+* Answer natural-language questions about reconciliation results
+
+The deterministic engine would remain responsible for financial calculations and matching, while AI would assist with investigation and decision support.
+
+### 28.3 Historical ML-Based Cash Forecasting
+
+The current forecast uses deterministic scenarios because the prototype does not contain sufficient historical data for reliable statistical forecasting.
+
+With sufficient production history, CashSight could introduce machine-learning models using:
+
+* Payment and order volumes
+* Settlement timing patterns
+* Historical cash inflows
+* Refunds and reversals
+* Fees and deductions
+* Day-of-week and seasonal patterns
+* Merchant-specific payment behavior
+
+This could evolve the current scenario forecast into a statistically calibrated cash-flow prediction system.
+
+### 28.4 Intelligent Exception Prioritization
+
+As transaction volumes increase, finance teams may receive thousands of exceptions. Future versions could automatically rank exceptions based on business impact.
+
+Prioritization could consider:
+
+* Transaction value
+* Exception age
+* Financial exposure
+* Historical recurrence
+* Probability of being a genuine mismatch
+* Merchant or payment-source impact
+
+This would allow finance teams to focus on the most important reconciliation issues first.
+
+### 28.5 Learning from Human Resolutions
+
+The existing human-in-the-loop workflow can become a feedback mechanism.
+
+Confirmed and rejected resolutions could be stored as structured feedback and later used to:
+
+* Improve matching suggestions
+* Identify recurring reconciliation patterns
+* Reduce repeated false positives
+* Improve exception classification
+* Train future machine-learning models
+
+This creates a continuous improvement loop where every verified financial decision can make future automation more accurate.
+
+### 28.6 Proactive Settlement & Cash Alerts
+
+Instead of only identifying problems after reconciliation, CashSight could proactively detect potential cash-flow risks.
+
+Examples include:
+
+* Settlement not received within the expected settlement window
+* Unusual reduction in payment inflows
+* Unexpected increase in gateway fees or deductions
+* Large unresolved reconciliation exposure
+* Forecasted cash falling below a configured threshold
+* Repeated failures associated with a particular payment source
+
+This would help finance teams identify operational issues before they become significant cash-flow problems.
+
+### 28.7 Multi-Gateway & Multi-Bank Reconciliation
+
+Businesses frequently operate across multiple payment channels and bank accounts.
+
+Future versions could provide a unified reconciliation layer for:
+
+* Multiple payment gateways
+* Multiple bank accounts
+* Different settlement formats
+* Provider-specific fee structures
+* Different currencies and payment methods
+* Cross-account transaction tracking
+
+This would provide a single financial view instead of requiring separate reconciliation workflows for each provider.
+
+### 28.8 Automated Finance Operations
+
+CashSight could eventually move beyond analysis toward controlled workflow automation.
+
+Potential capabilities include:
+
+* Scheduled reconciliation jobs
+* Automatic report generation
+* Automated exception notifications
+* Daily cash-position summaries
+* Configurable finance rules
+* Webhook-triggered processing
+* Automated escalation of high-value exceptions
+
+Human approval would remain part of workflows involving ambiguous or financially sensitive decisions.
+
+### 28.9 Production-Grade Data & Security Infrastructure
+
+The current prototype uses in-memory processing. A production deployment would require persistent and scalable infrastructure.
+
+Future improvements include:
+
+* PostgreSQL-based persistent storage
+* Object storage for uploaded files and reports
+* Role-based access control
+* Merchant and account-level permissions
+* Immutable audit records
+* Encryption and secure credential management
+* Data retention and archival policies
+* Background job processing
+
+### 28.10 Long-Term Product Direction
+
+The long-term vision is to evolve CashSight from a CSV-based reconciliation application into an intelligent finance-operations control layer connecting payment gateways, banks, and business systems.
+
+```text
+Payment Gateways + Banks + ERP Systems
+                ↓
+       API / Webhook Ingestion
+                ↓
+        Data Quality & Validation
+                ↓
+       Deterministic Reconciliation
+                ↓
+       Exception Detection
+                ↓
+     ┌──────────┴──────────┐
+     ↓                     ↓
+AI-Assisted Review     ML Cash Forecasting
+     ↓                     ↓
+Human Verification     Risk & Alerts
+     └──────────┬──────────┘
+                ↓
+       Finance Control Layer
+                ↓
+     Reports + Audit + Automation
+```
+
+The core principle is to keep financial calculations and reconciliation decisions explainable and deterministic, while progressively introducing AI and machine learning for investigation, prioritization, prediction, and workflow automation.
+
+---
+
+# 29. Future Architecture
 
 The long-term architecture can evolve toward:
 
@@ -1074,33 +1464,33 @@ The objective is to move from periodic manual reconciliation toward continuous f
 
 ---
 
-# 29. Design Principles
+# 30. Design Principles
 
 CashSight follows five core principles:
 
-### 1. Reconcile before forecasting
+### I. Reconcile before forecasting
 
 Forecasting should be grounded in the best available financial state rather than raw, potentially inconsistent data.
 
-### 2. Explain rather than silently decide
+### II. Explain rather than silently decide
 
 Every automated financial classification should have an understandable reason.
 
-### 3. Preserve ambiguity
+### III. Preserve ambiguity
 
 When multiple matches are possible, the system should expose the ambiguity instead of forcing a match.
 
-### 4. Measure accuracy
+### IV. Measure accuracy
 
 Reconciliation quality should be evaluated using ground truth and financial-impact metrics.
 
-### 5. Keep humans in control
+### V. Keep humans in control
 
 High-confidence cases can be automated, while uncertain financial decisions remain reviewable by the user.
 
 ---
 
-# 30. Summary
+# 31. Summary
 
 CashSight transforms fragmented merchant financial records into a structured finance-operations workflow:
 
