@@ -33,7 +33,7 @@ export function DataProvider({ children }) {
       setExceptions(exceptionsRes.data.exceptions || [])
       setCashPosition(cash.data)
       setForecast(forecastRes.data)
-      setDataSource('sample') // 🔥 Set to sample
+      setDataSource('sample')
       setLastUpdated(new Date().toISOString())
       
       return { success: true }
@@ -73,14 +73,12 @@ export function DataProvider({ children }) {
     }
   }, [])
 
-  // 🔥 When data is uploaded, set source to uploaded
   const setUploadedData = useCallback((data) => {
     setReconciliationData(data)
-    setDataSource('uploaded') // 🔥 Set to uploaded
+    setDataSource('uploaded')
     setLastUpdated(new Date().toISOString())
   }, [])
 
-  // 🔥 Direct update for data source
   const updateDataSource = useCallback((source) => {
     console.log('📊 DataContext: updating dataSource to:', source)
     setDataSource(source)
@@ -109,7 +107,7 @@ export function DataProvider({ children }) {
     loadSampleData,
     refreshData,
     setUploadedData,
-    updateDataSource, // 🔥 Expose this
+    updateDataSource,
     clearData,
     setExceptions,
     setReconciliationData,
