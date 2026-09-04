@@ -53,7 +53,7 @@ export default function DataQualityReport({ data, validationResult, onComplete, 
       console.log('   Settlements:', data?.settlement_data?.length || 0, 'rows')
       console.log('   Bank:', data?.bank_data?.length || 0, 'rows')
       
-      const response = await fetch('http://localhost:5000/api/validate-data', {
+      const response = await fetch('https://cashsight-api.onrender.com/api/validate-data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
