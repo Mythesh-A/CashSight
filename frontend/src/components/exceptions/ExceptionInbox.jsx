@@ -32,7 +32,7 @@ export default function ExceptionInbox({ onBack }) {
     setError(null)
     try {
       console.log('🔍 Fetching exceptions...')
-      const response = await fetch('http://localhost:5000/api/exceptions')
+      const response = await fetch('https://cashsight-api.onrender.com/api/exceptions')
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -80,7 +80,7 @@ export default function ExceptionInbox({ onBack }) {
   const handleResolve = async (exception) => {
     try {
       // For quick resolve, use confirm decision
-      const response = await fetch('http://localhost:5000/api/resolve-exception', {
+      const response = await fetch('https://cashsight-api.onrender.com/api/resolve-exception', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -18,7 +18,7 @@ export const APP_CONFIG = {
 
 export const API_CONFIG = {
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000',
-  timeout: 30000,
+  timeout: 120000,
   retryCount: 3,
   retryDelay: 1000,
 }

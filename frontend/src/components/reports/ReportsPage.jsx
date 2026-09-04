@@ -14,7 +14,7 @@ export default function ReportsPage({ onBack }) {
     setSuccess(null)
     
     try {
-      const response = await fetch(`http://localhost:5000${endpoint}`, {
+      const response = await fetch(`https://cashsight-api.onrender.com${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -21,7 +21,7 @@ export default function AuditPage({ onBack }) {
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch('http://localhost:5000/api/audit')
+      const response = await fetch('https://cashsight-api.onrender.com/api/audit')
       if (!response.ok) {
         throw new Error('Failed to fetch audit logs')
       }

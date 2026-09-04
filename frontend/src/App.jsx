@@ -35,8 +35,8 @@ function AppWrapper() {
     const fetchCounts = async () => {
       try {
         const [reconcileRes, exceptionsRes] = await Promise.all([
-          fetch('http://localhost:5000/api/reconcile'),
-          fetch('http://localhost:5000/api/exceptions'),
+          fetch('https://cashsight-api.onrender.com/api/reconcile'),
+          fetch('https://cashsight-api.onrender.com/api/exceptions'),
         ])
         
         if (reconcileRes.ok) {

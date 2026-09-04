@@ -29,7 +29,7 @@ export default function AuditTrail({ onViewAll, limit = AUDIT_DEFAULTS.widgetLim
   const fetchAuditLogs = async () => {
     setLoading(true)
     try {
-      const response = await fetch('http://localhost:5000/api/audit')
+      const response = await fetch('https://cashsight-api.onrender.com/api/audit')
       if (!response.ok) {
         throw new Error('Failed to fetch audit logs')
       }

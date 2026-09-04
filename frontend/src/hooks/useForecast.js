@@ -14,7 +14,7 @@ export function useForecast(options = {}) {
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch('http://localhost:5000/api/forecast')
+      const response = await fetch('https://cashsight-api.onrender.com/api/forecast')
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }

@@ -21,7 +21,7 @@ export default function AuditDetails({ settlementId, onClose }) {
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch(`http://localhost:5000/api/audit/${settlementId}`)
+      const response = await fetch(`https://cashsight-api.onrender.com/api/audit/${settlementId}`)
       if (!response.ok) {
         throw new Error('Failed to fetch audit trail')
       }

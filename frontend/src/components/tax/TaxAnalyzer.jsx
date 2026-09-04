@@ -24,7 +24,7 @@ export default function TaxAnalyzer({ onBack }) {
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch('http://localhost:5000/api/tax-analyzer')
+      const response = await fetch('https://cashsight-api.onrender.com/api/tax-analyzer')
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
