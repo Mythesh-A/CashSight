@@ -65,11 +65,11 @@ For testing the complete CSV upload workflow, you can use the provided datasets 
 
 CashSight includes three manually prepared datasets for testing the CSV upload and reconciliation workflow at different scales.
 
-| Dataset       | Settlements | Recommended Use            |
-| ------------- | ----------: | -------------------------- |
-| 🟢 **Small**  |          10 | Quick demonstration        |
-| 🟡 **Medium** |          50 | Realistic workflow testing |
-| 🔴 **Large**  |         150 | Higher-volume testing      |
+| Dataset | Recommended Use            |
+| ------- | -------------------------- |
+| Small   | Quick demonstration        |
+| Medium  | Realistic workflow testing |
+| Large   | Higher-volume testing      |
 
 Each dataset contains:
 
@@ -82,10 +82,10 @@ bank_statement.csv
 ### 📥 Download Datasets
 
 **GitHub Dataset Folder:**
-👉 **[📂 Download / View All CSV Datasets](sample_csv_datas)**
+👉 **[Download / View All CSV Datasets](https://github.com/Mythesh-A/CashSight/tree/main/.sample_csv_datas)**
 
 **Google Drive:**
-👉 **[📦 Download All Dataset Files](https://drive.google.com/uc?export=download&id=10ztLrQ9h4z-I8KVjmwW4o2cmIk4Gyrxu)**
+👉 **[Download All Dataset Files](https://drive.google.com/uc?export=download&id=10ztLrQ9h4z-I8KVjmwW4o2cmIk4Gyrxu)**
 
 For the CSV workflow, download one complete dataset and upload all three files from the same dataset through the **CSV Upload** section.
 
